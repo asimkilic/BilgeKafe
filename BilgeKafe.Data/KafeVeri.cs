@@ -16,7 +16,7 @@ namespace BilgeKafe.Data
         public int MasaAdet { get; set; } = 20;
         public DbSet<Urun> Urunler { get; set; }
         public DbSet<Siparis> Siparisler { get; set; }
-
+        public DbSet<SiparisDetay> SiparisDetaylar { get; set; }
 
     }
 }

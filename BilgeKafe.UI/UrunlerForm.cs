@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.Entity;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -19,7 +20,7 @@ namespace BilgeKafe.UI
         public UrunlerForm(Data.KafeVeri db)
         {
             this.db = db;
-            blUrunler = new BindingList<Urun>(db.Urunler);
+            blUrunler = new BindingList<Urun>(db.Urunler.ToList());
             InitializeComponent();
             dgvUrunler.AutoGenerateColumns = false;
             dgvUrunler.DataSource = blUrunler;
@@ -36,7 +37,9 @@ namespace BilgeKafe.UI
             }
             if (btnUrunEkle.Text == "EKLE")
             {
-                blUrunler.Add(new Urun { UrunAd = ad, BirimFiyat = nudBirimFiyat.Value });
+                Urun urun = new Urun { UrunAd = ad, BirimFiyat = nudBirimFiyat.Value };
+                blUrunler.Add(urun);
+                db.Urunler.Add(urun);
 
             }
             else
@@ -47,6 +50,8 @@ namespace BilgeKafe.UI
                 urun.BirimFiyat = nudBirimFiyat.Value;
                 blUrunler.ResetBindings(); // Bende bir değişiklik oldu diye haber veriyoruz, yeni eklemelerde/silmelerde kendisi otomatik ekliyor fakat düzenlemelerde manuel olarak yapılması gereklidir.
             }
+
+            db.SaveChanges();
             FormuResetle();
 
         }
@@ -54,11 +59,16 @@ namespace BilgeKafe.UI
         private void dgvUrunler_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
         {
             DialogResult dr = MessageBox.Show("Seçilü ürün silinecektir. Onaylıyor musunuz?", "Silme Onayı", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
-            e.Cancel = dr == DialogResult.No;
-            //if (dr == DialogResult.No)
-            //{
-            //    e.Cancel = true;
-            //}
+
+
+            if (dr == DialogResult.No)
+            {
+                e.Cancel = true;
+                return;
+            }
+            Urun urun = (Urun)e.Row.DataBoundItem;
+            db.Urunler.Remove(urun);
+            db.SaveChanges();
 
         }
 
